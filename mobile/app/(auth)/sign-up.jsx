@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSignUp } from '@clerk/clerk-expo'
-import { Link, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { styles } from "@/assets/styles/auth.styles.js"
 import { Ionicons } from "@expo/vector-icons"
 import { COLORS } from "../../constants/colors.js"
 import { Image } from 'expo-image'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp()
@@ -62,9 +63,12 @@ export default function SignUpScreen() {
         console.error(JSON.stringify(signUpAttempt, null, 2))
       }
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+      if (err.error?.[0]?.code === 'form_identifer-exists') {
+        setError('Esse email ja esta em uso, por favor tente outro!')
+      } else {
+        setError('Ocorreu um erro, por favor tente novamente.')
+      }
+      console.log(err)
     }
   }
 
@@ -98,7 +102,13 @@ export default function SignUpScreen() {
   }
 
   return (
-    <View style={{flex:1, alignItems: "center", justifyContent: "center"}}>
+    <KeyboardAwareScrollView 
+    style={{ flex: 1 }}
+    contentContainerStyle={{ flexGrow: 1 }}
+    enableOnAndroid={true}
+    enableAutomaticScroll={true}
+    extraScrollHeight={100}
+    >
         <View style={styles.container}>
         <Image source={require('../../assets/images/revenue-i2.png')} style={styles.illustration} />
         <Text style={styles.title}>Criar Conta</Text>
@@ -141,6 +151,6 @@ export default function SignUpScreen() {
         </View>
       </View>
       
-    </View>
+    </KeyboardAwareScrollView>
   )
 }
